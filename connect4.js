@@ -10,6 +10,11 @@ const HEIGHT = 6;
 
 let currPlayer = 1; // active player: 1 or 2
 const board = []; // array of rows, each row is array of cells  (board[y][x])
+//this comment below shows howw JS knows what to do with the y coordinates from the sub-arrays.
+/*
+y0: [null, nul, null],
+y1: [null, nul, null]
+*/
 
 /** makeBoard: create in-JS board structure:
  *    board = array of rows, each row is array of cells  (board[y][x])
@@ -60,7 +65,9 @@ function makeHtmlBoard() {
 
 function findSpotForCol(x) {//ask about this one as well.
   for (let y = HEIGHT - 1; y >= 0; y--) {//descending loop
-    if (!board[y][x]) {//I think this means if the coordinate is null(falsy) then return the y coordinate but how does that drop the piece in the lowest free spot?
+    //this checks if there is a piece in the lowest y-coordinate in the given column. if not, then it returns null. 
+    //and if null that means the spot is empty and the function returns the empty spot's y coordinate. The descending loop is used to get the lowest point in the column because the highest point in the column would actually have the index of 0 because it is first in this case.
+    if (!board[y][x]) {
       return y;
     }
   }
@@ -85,6 +92,7 @@ function placeInTable(y, x) {
 
 function endGame(msg) {
   // TODO: pop up alert message
+  alert(msg);
 }
 
 /** handleClick: handle click of column top to play piece */
@@ -95,14 +103,15 @@ function handleClick(evt) {
 
   // get next spot in column (if none, ignore click)
   let y = findSpotForCol(x);
+  //this line of code below checks the column to see if there is an empty spot. If the whole column full then it returns nothing (ignores the click).
   if (y === null) {
     return;
   }
 
   // place piece in board and add to HTML table
   // TODO: add line to update in-memory board
-  board[y][x] = currPlayer; //***ask about this whole function. Dindn't understand the instructions here***
-  placeInTable(y, x);
+  board[y][x] = currPlayer; //***ask about this whole function. Dindn't understand the instructions here*** this is assigning a num 1 or 2 into board[y][x] only seen on the JS side
+  placeInTable(y, x); //changing the visual of what the user sees in the browser
 
   // check for win
   if (checkForWin()) {
@@ -112,6 +121,7 @@ function handleClick(evt) {
   // check for tie
   // TODO: check if all cells in board are filled; if so call, call endGame
   if (board.every(row => row.every(cell => cell))) {
+    // after the arrow is what the function returns. the arrow, returen and parameter make up the whole function. The 'cell' here can be null, 1 or 2. null is falsy while 1 or 2 is considered truthy (remember the model on line 104)
     return endGame('Tie!');
   }
 
@@ -130,23 +140,27 @@ function checkForWin() {
 
     return cells.every(
       ([y, x]) =>
+      //these 4 lines below check to makes sure the piece is within the bounds of the board.
         y >= 0 &&
         y < HEIGHT &&
         x >= 0 &&
         x < WIDTH &&
         board[y][x] === currPlayer
+        // this line above is another condition to be met it checks the cells to see if 4 pieces played belongs to the current player.
     );
   }
 
   // TODO: read and understand this code. Add comments to help you.
 
-  for (var y = 0; y < HEIGHT; y++) {
-    for (var x = 0; x < WIDTH; x++) {
-      var horiz = [[y, x], [y, x + 1], [y, x + 2], [y, x + 3]];
-      var vert = [[y, x], [y + 1, x], [y + 2, x], [y + 3, x]];
-      var diagDR = [[y, x], [y + 1, x + 1], [y + 2, x + 2], [y + 3, x + 3]];
-      var diagDL = [[y, x], [y + 1, x - 1], [y + 2, x - 2], [y + 3, x - 3]];
-
+  for (let y = 0; y < HEIGHT; y++) {
+    //a for loop to check every y-coordinate in the board
+    for (let x = 0; x < WIDTH; x++) {
+      //a for loop to check every x coordinate in the board
+      let horiz = [[y, x], [y, x + 1], [y, x + 2], [y, x + 3]];//this line checks to see if the player has four of their pieces in a horizontal line. [0,0],[0,1], [0,2], [0,3]
+      let vert = [[y, x], [y + 1, x], [y + 2, x], [y + 3, x]];//in this line the vertical position changes positively while the horizontal position stays the same, indicating vertical movement
+      let diagDR = [[y, x], [y + 1, x + 1], [y + 2, x + 2], [y + 3, x + 3]];//in this line the x and y values change by positive 1 each so this simulates an upward diagonal movement to the right
+      let diagDL = [[y, x], [y + 1, x - 1], [y + 2, x - 2], [y + 3, x - 3]];//in this line the x value goes down by negative 1 each time while the y value goes up by positive 1 which indicates an upward diagonal movement to the left.
+      //the loop checks every cell in the board to see if their adjacent cells satisfies one of the four lines above.
       if (_win(horiz) || _win(vert) || _win(diagDR) || _win(diagDL)) {
         return true;
       }
